@@ -328,7 +328,7 @@ class CQASMConverter(AGateConverter):
                             end_indx = param.find("]")
                             ins_qubits.append(param[start_indx+2:end_indx])
                         # Rotation gates
-                        elif self._is_float(param) and len(ins_qubits) == 1 and len(ins_params) == 2:
+                        elif self._is_float(param):
                             theta = float(param)
                 
                 if len(ins_qubits) > 2:
@@ -356,9 +356,8 @@ class CQASMConverter(AGateConverter):
                     index.indices.append(cqasm.values.ConstInt(qubit_index))
                     statement.operands.append(index)
                 if theta is not None:
-                    # Facing trouble with adding parameter
-                    parameter = cqasm.values.ConstFloat(theta)
-                    statement.operands.append(parameter)
+                    angle = cqasm.values.ConstFloat(value=theta)
+                    statement.operands.append(angle)
                 ast.block.statements.append(statement)
             except ValueError:
                 print("An error in parsing the cQASM v1 file.")

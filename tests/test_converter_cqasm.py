@@ -324,16 +324,17 @@ qubits w
         CQASMConverter(catalog).convert_string_v1(source)
 
 
-# def test_converter_v1_rotation_gates():
-#     source = f"""
-# version 1.0
+def test_converter_v1_rotation_gates():
+    source = f"""
+version 1.0
 
-# qubits 2
+qubits 2
 
-# .rotation
-#     Rx q[0], 3.14
-# """
-#     pc = CQASMConverter(catalog).convert_string_v1(
-#         source, use_postselection=False)
-#     assert pc.circuit_size == 26
-
+.rotation
+    Rx q[1], 1.57
+    Ry q[0], 3.14
+"""
+    pc = CQASMConverter(catalog).convert_string_v1(
+        source, use_postselection=False)
+    assert pc.circuit_size == 4
+    assert pc.source_distribution[StateVector('|1,0,1,0>')] == 1
