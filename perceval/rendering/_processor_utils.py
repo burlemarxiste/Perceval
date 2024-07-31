@@ -60,13 +60,11 @@ def collect_herald_info(processor: AProcessor, recursive: bool):
     level of granularity as the drawing: for individual circuit elements when
     recursive is True, for blocks when recursive is False.
     """
-    if recursive:
-        component_list = processor.flatten()
-    else:
-        component_list = processor._components
+    component_list = processor.flatten(recursion_depth=1 if recursive else 0)
 
-    herald_info = {}
+    herald_info = { None: ComponentHeraldInfo() }
     for herald_mode in processor.heralds.keys():
+        connected_to_component = False
         # Do one forward pass to identify heralds on inputs, and one
         # backward pass to identify heralds "plugged" on outputs
         for forward_pass in [True, False]:
@@ -86,5 +84,10 @@ def collect_herald_info(processor: AProcessor, recursive: bool):
                     h_info = herald_info.setdefault(
                         component, ComponentHeraldInfo())
                     h_info.register_herald(forward_pass, mode - m0, herald_mode)
+                    connected_to_component = True
                     break
+        if not connected_to_component:
+            # This herald is not connected to any meaningful component, thus
+            # position it outside of the circuit box and draw all lines.
+            herald_info[None].register_herald(True, herald_mode, herald_mode)
     return herald_info

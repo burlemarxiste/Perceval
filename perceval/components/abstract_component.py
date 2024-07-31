@@ -162,7 +162,7 @@ class AParametrizedComponent(AComponent):
                 map_param_kid[p._pid] = p.name
         return map_param_kid
 
-    def copy(self, subs: Union[dict, list] = None):
+    def copy(self, subs: Union[dict, list] = None, strict=True):
         nc = copy.deepcopy(self)
 
         if subs is None:

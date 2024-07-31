@@ -183,11 +183,11 @@ class AProcessor(ABC):
             return self._postselect(state)
         return True
 
-    def copy(self, subs: Union[dict, list] = None):
+    def copy(self, subs: Union[dict, list] = None, strict=True):
         new_proc = copy.deepcopy(self)
         new_proc._components = []
         for r, c in self._components:
-            new_proc._components.append((r, c.copy(subs=subs)))
+            new_proc._components.append((r, c.copy(subs=subs, strict=strict)))
         return new_proc
 
     def set_circuit(self, circuit: ACircuit):
@@ -563,18 +563,20 @@ class AProcessor(ABC):
         self._source = source
         self._inputs_map = None
 
-    def flatten(self) -> List:
+    def flatten(self, recursion_depth=1<<32) -> List:
         """
+        Flatten a circuit down to a specific recursion level.
+        :param recursion_depth: how deep the circuit must be flattened.
         :return: a component list where recursive circuits have been flattened
         """
-        return _flatten(self)
+        return _flatten(self, recursion_depth=recursion_depth)
 
 
-def _flatten(composite, starting_mode=0) -> List:
+def _flatten(composite, starting_mode=0, recursion_depth=1<<32) -> List:
     component_list = []
     for m_range, comp in composite._components:
-        if isinstance(comp, Circuit):
-            sub_list = _flatten(comp, starting_mode=m_range[0])
+        if isinstance(comp, Circuit) and recursion_depth > 0:
+            sub_list = _flatten(comp, starting_mode=m_range[0], recursion_depth=recursion_depth-1)
             component_list += sub_list
         else:
             m_range = [m + starting_mode for m in m_range]

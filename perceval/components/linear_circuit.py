@@ -464,7 +464,8 @@ class Circuit(ACircuit):
         return c
 
     def add(self, port_range: Union[int, Tuple[int], Tuple[int, int], Tuple[int, int, int]],
-            component: ACircuit, merge: bool = False, x_grid: int = None) -> Circuit:
+            component: ACircuit, merge: bool = False, x_grid: int = None,
+            strict: bool = True) -> Circuit:
         r"""Add a component in a circuit
 
         :param port_range: the port range as a tuple of consecutive ports, or the initial port where to add the
@@ -495,7 +496,7 @@ class Circuit(ACircuit):
         # merge the parameters - we are only interested in non-assigned parameters if it is not a global operator
         for _, p in component._params.items():
             if not p.fixed:
-                if p.name in self._params and p._pid != self._params[p.name]._pid:
+                if strict and p.name in self._params and p._pid != self._params[p.name]._pid:
                     raise RuntimeError("two parameters with the same name in the circuit (%s)" % p.name)
                 self._params[p.name] = p
         # register the component
@@ -601,12 +602,12 @@ class Circuit(ACircuit):
                 raise ValueError(f"Unknown interferometer shape: {shape}")
         return GenericInterferometer(m, fun_gen, shape, depth, phase_shifter_fun_gen, phase_at_output)
 
-    def copy(self, subs: Union[dict,list] = None):
+    def copy(self, subs: Union[dict,list] = None, strict=True):
         nc = copy.deepcopy(self)
         nc._params = {}
         nc._components = []
         for r, c in self._components:
-            nc.add(r, c.copy(subs=subs))
+            nc.add(r, c.copy(subs=subs), strict=strict)
         return nc
 
     @staticmethod

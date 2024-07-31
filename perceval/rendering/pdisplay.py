@@ -131,9 +131,12 @@ def pdisplay_processor(processor: AProcessor,
 
     herald_info = {}
     if len(processor.heralds):
-        for k in processor.heralds.keys():
-            renderer.set_mode_style(k, ModeStyle.HERALD)
+        processor = processor.copy(strict=False)
         herald_info = collect_herald_info(processor, recursive)
+        unconnected_heralds = herald_info[None].input_heralds.keys()
+        for k in processor.heralds.keys():
+            if k not in unconnected_heralds:
+                renderer.set_mode_style(k, ModeStyle.HERALD)
 
     for rendering_pass in [pre_renderer, renderer]:
         if not rendering_pass:
